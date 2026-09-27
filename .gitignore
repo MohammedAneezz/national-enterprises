@@ -20,3 +20,11 @@ Thumbs.db
 
 # Backups / local
 backups/
+
+# Gradle / Android Studio generated
+build.log
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.apk

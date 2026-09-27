@@ -4,9 +4,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import axios from 'axios';
 
-// Set with: EXPO_PUBLIC_API_URL=https://xxxx.ngrok-free.app/api/v1  npx expo start --tunnel
-// Falls back to your home WiFi IP. No code change needed to share.
-const API = process.env.EXPO_PUBLIC_API_URL || 'http://172.20.10.3:8000/api/v1';
+// Baked at build time via EXPO_PUBLIC_API_URL, but editable on Login screen
+// so one APK works with any backend (home WiFi, ngrok, Render).
+let API = (process.env.EXPO_PUBLIC_API_URL || 'http://172.20.10.3:8000/api/v1').replace(/\/$/, '');
 const C = { primary: '#0F172A', secondary: '#1E3A8A', cta: '#A16207', bg: '#F8FAFC', card: '#FFFFFF', text: '#020617', muted: '#475569', border: '#E2E8F0', danger: '#DC2626', green: '#16A34A' };
 let AUTH = '', LINE = null;
 
@@ -29,15 +29,19 @@ function Lines({ nav }) {
 
 function Login({ nav }) {
   const [u, setU] = useState('admin'); const [p, setP] = useState('admin123');
+  const [srv, setSrv] = useState(API);
   const go = async () => {
+    API = srv.replace(/\/$/, '');
     try {
       const r = await axios.post(`${API}/auth/login`, { username: u, password: p });
       AUTH = `Bearer ${r.data.access_token}`; nav.navigate('Lines');
-    } catch { Alert.alert('Login failed'); }
+    } catch { Alert.alert('Login failed', 'Check server URL and backend is running'); }
   };
   return (
     <View style={s.page}>
       <Text style={s.h1}>NATIONAL ENTERPRISES</Text>
+      <Text style={s.sub}>Server (backend URL + /api/v1)</Text>
+      <TextInput style={s.in} value={srv} onChangeText={setSrv} placeholder="http://SERVER:8000/api/v1" autoCapitalize="none" />
       <TextInput style={s.in} value={u} onChangeText={setU} placeholder="Username" />
       <TextInput style={s.in} value={p} onChangeText={setP} placeholder="Password" secureTextEntry />
       <TouchableOpacity style={s.btn} onPress={go}><Text style={s.btnT}>Login as Admin</Text></TouchableOpacity>

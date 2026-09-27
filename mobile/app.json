@@ -6,6 +6,11 @@
     "orientation": "portrait",
     "main": "App.js",
     "newArchEnabled": false,
-    "platforms": ["android", "ios", "web"]
+    "platforms": ["android"],
+    "android": {
+      "package": "com.nationalenterprises.app",
+      "versionCode": 1,
+      "permissions": ["INTERNET"]
+    }
   }
 }
