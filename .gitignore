@@ -1,0 +1,22 @@
+# Python / FastAPI
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.db
+*.sqlite
+.env
+
+# Node / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups / local
+backups/

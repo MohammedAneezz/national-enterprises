@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "NATIONAL ENTERPRISES",
+    "slug": "national-enterprises",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "main": "App.js",
+    "newArchEnabled": false,
+    "platforms": ["android", "ios", "web"]
+  }
+}
