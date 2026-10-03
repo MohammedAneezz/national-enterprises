@@ -38,6 +38,8 @@ jobs:
           cache-dependency-path: mobile/package-lock.json
       - run: npm ci --legacy-peer-deps
         working-directory: mobile
+      - run: npm test
+        working-directory: mobile
       - run: npx expo install --check
         working-directory: mobile
       - run: npx expo export --platform android

@@ -28,6 +28,8 @@ android/build/
 android/app/build/
 android/local.properties
 *.apk
+mobile/android/keystore.properties
+mobile/android/app/*.keystore
 
 # Local verification artifacts
 mobile/test-results/
