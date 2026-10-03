@@ -1,46 +1,48 @@
-# NATIONAL ENTERPRISES — EMI Collections App
+# NATIONAL ENTERPRISES
 
-Mobile + backend for weekly EMI collections. A-Line / B-Line / C-Line workspaces.
-Customers (name + phone + area only), products (came vs sold), weekly dues anchored
-to purchase date, manual collections with +100/+200/+500 quick-add (Cash/UPI only),
-daily report with left-outs + overdue.
+A local-first weekly EMI collections app. FastAPI stores customers, sales, dues, payments, and reports in SQLite. Expo provides the mobile workspace for A-Line, B-Line, and C-Line.
 
-## Can anyone download from GitHub and use it?
+For an Android client release with a hosted database and monthly backups, see [PRODUCTION-ANDROID.md](PRODUCTION-ANDROID.md).
 
-Yes. This repo is self-contained:
-- Backend: Python 3.10+ + FastAPI + SQLite (no external DB needed)
-- Mobile: Node 18+ + Expo Go on iPhone/Android (no App Store build needed)
-- Default login `admin` / `admin123` — change after first login (or via env/seed)
+## Run
 
-No paid services required for local use. For sharing outside your WiFi you need
-a free tunnel (ngrok + `expo --tunnel`). See `SHARE-iOS.md`.
-
-## Quick start (downloaded from GitHub)
+Use two terminals in `C:\Users\moham\enterprise-collections`.
 
 ```powershell
-# 1. Backend
 cd backend
-copy .env.example .env   # optional, edit SECRET_KEY
 python -m pip install -r requirements.txt
-python -m pytest tests -q  # should be 4 passed
-python run.py              # http://127.0.0.1:8000/docs
+python -m pytest -q
+python run.py
+```
 
-# 2. Mobile (new terminal)
+The API runs at http://127.0.0.1:8000 and its interactive docs are at http://127.0.0.1:8000/docs. To use authenticated endpoints in the docs, call `POST /api/v1/auth/login`, copy `access_token`, select **Authorize**, and paste the token.
+
+```powershell
 cd mobile
 npm install --legacy-peer-deps
 npx expo start
-# Expo Go on phone -> scan QR -> admin/admin123 -> pick A/B/C-Line
 ```
 
-Phone on same WiFi: edit `mobile/App.js` `API` to your PC LAN IP
-(`ipconfig` -> IPv4, e.g. `http://192.168.1.5:8000/api/v1`).
-Outside WiFi: see `SHARE-iOS.md` (ngrok + `EXPO_PUBLIC_API_URL`).
+Open the displayed QR code in a compatible Expo Go or development build. The app fills the Server URL from `EXPO_PUBLIC_API_URL` when set; otherwise it derives the computer's LAN IP from the Expo host. The field can be changed on the login screen. The phone and computer must be on the same Wi-Fi network for a LAN URL.
 
-## Tests
-`cd backend; python -m pytest tests -v` — lines seed, area-only customers,
-weekly anchor (+7 days), Cash/UPI validation, daily left-outs.
+Initial credentials: **admin / admin123**. Set `ADMIN_PASSWORD` before the first backend start to use another initial password. The seed is created only when the database has no admin user. Set a persistent, randomly generated `SECRET_KEY` in `backend/.env` if sessions should survive backend restarts; without it, each process uses a new key. The database is `backend/national.db` and is excluded from Git.
 
-## Security notes before making public
-- Change `SECRET_KEY` in `backend/.env` (never commit `.env`)
-- Change default admin password after `init_db` seeds it
-- `national.db` is git-ignored; each install gets a fresh DB with A/B/C lines
+## Workspaces
+
+Select A-Line, B-Line, or C-Line after login. The top-right dashboard button opens today's overview; the line menu switches workspaces. Each line has its own customers, sales, dues, payments, and reports. The product catalog and stock counts are shared.
+
+- **Customers:** Filter by area or search name/phone. Add a customer with name and optional area/phone. Open a customer for their ledger, new EMI sale, weekly schedule, and payment history.
+- **New EMI sale:** Choose a product in stock, enter quantity, total EMI, down payment, weekly amount, tenure, and purchase date. The financed balance equals total EMI less down payment. The final week's due may be smaller so dues sum to the exact balance.
+- **Collect:** Enter or select a Sale ID. The +100, +200, and +500 buttons add to the amount; the amount remains editable. Only Cash and UPI are accepted, and UPI requires a reference. Collections apply to that sale's oldest unpaid dues first. A payment larger than the sale's balance is rejected.
+- **Stock:** Enter a product name and quantity. Existing names restock the existing product. Add prices and an optional SKU when creating a product. Available stock is came minus sold.
+- **Reports:** See purchase-date sales, daily Cash and UPI collections, today's unpaid dues, and earlier unpaid dues. Business days use `Asia/Kolkata` by default; set `BUSINESS_TIMEZONE` to change it. Daily reports show current due status for the selected date.
+
+Customer records contain only name, phone, area, notes, outstanding balance, and line ID. The API docs at `/docs` show all endpoints.
+
+## Verification
+
+`python -m pytest -q` in `backend` runs the API tests. `npm run check` in `mobile` validates installed Expo versions, and `npx expo export --platform android --platform web` checks bundle compilation. `npm run test:e2e` runs a 375px browser flow against an isolated temporary database; it requires Microsoft Edge.
+
+The repository includes an Android project. For a new native configuration run `npx expo prebuild --platform android`, then `cd android; .\gradlew assembleDebug`. The HTTP LAN configuration is in `mobile/plugins/withLanHttp.js`.
+
+Expo SDK 52 is kept as requested. An installed Expo Go must support SDK 52; if it does not, use a matching client or an Android development build. Run `npm audit --omit=dev` to inspect the current advisories in this older SDK's dependency tree.

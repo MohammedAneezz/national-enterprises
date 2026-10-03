@@ -2,15 +2,29 @@
   "expo": {
     "name": "NATIONAL ENTERPRISES",
     "slug": "national-enterprises",
-    "version": "1.0.0",
+    "version": "1.1.0",
+    "runtimeVersion": { "policy": "appVersion" },
     "orientation": "portrait",
-    "main": "App.js",
-    "newArchEnabled": false,
-    "platforms": ["android"],
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "platforms": [
+      "android",
+      "ios",
+      "web"
+    ],
     "android": {
       "package": "com.nationalenterprises.app",
-      "versionCode": 1,
-      "permissions": ["INTERNET"]
+      "versionCode": 2,
+      "permissions": [
+        "INTERNET"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.nationalenterprises.app",
+      "supportsTablet": true
+    },
+    "web": {
+      "bundler": "metro"
     }
   }
 }

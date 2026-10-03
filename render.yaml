@@ -1,0 +1,54 @@
+databases:
+  - name: national-enterprises-db
+    plan: 0.5c-1g
+    region: singapore
+    postgresMajorVersion: "18"
+    ipAllowList: []
+
+services:
+  - type: web
+    name: national-enterprises-api
+    runtime: python
+    plan: 0.5c-512mb
+    region: singapore
+    rootDir: backend
+    autoDeployTrigger: checksPass
+    buildCommand: pip install -r requirements.txt
+    preDeployCommand: python -m alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: national-enterprises-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: BUSINESS_TIMEZONE
+        value: Asia/Kolkata
+
+  - type: cron
+    name: national-enterprises-monthly-backup
+    runtime: docker
+    plan: 0.5c-512mb
+    region: singapore
+    schedule: "0 3 1 * *"
+    dockerfilePath: ./deploy/backup.Dockerfile
+    dockerContext: .
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: national-enterprises-db
+          property: connectionString
+      - key: BACKUP_S3_BUCKET
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
